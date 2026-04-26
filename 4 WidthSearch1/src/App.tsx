@@ -12,15 +12,11 @@ type Tab = typeof TABS[number]
 function App() {
   const [tab, setTab] = useState<Tab>('1. Лабиринт')
   return (
-    <div style={{ background: '#0f172a', minWidth: '100vw', minHeight: '100vh' }}>
-      <div style={{ display: 'flex', gap: 4, padding: '10px 20px', borderBottom: '1px solid #1e293b', flexWrap: 'wrap' }}>
+    <div style={{ minWidth: '100vw', minHeight: '100vh', background: '#f0f2f5', padding: '20px 0' }}>
+      <div className="app-container">
+      <div className="tab-nav">
         {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            padding: '6px 16px', borderRadius: 6, cursor: 'pointer', fontSize: 14,
-            background: tab === t ? '#334155' : 'transparent',
-            color:      tab === t ? '#e2e8f0' : '#64748b',
-            border:     tab === t ? '1px solid #475569' : '1px solid transparent',
-          }}>{t}</button>
+          <button key={t} onClick={() => setTab(t)} className={`tab-btn${tab === t ? ' active' : ''}`}>{t}</button>
         ))}
       </div>
       {tab === '1. Лабиринт'  && <ShortPathInLabyrin />}
@@ -29,6 +25,7 @@ function App() {
       {tab === '4. Строки'     && <StrinConver />}
       {tab === '5. Ближайший выход' && <MazeSolver />}
       {tab === '6. Поиск слова в сетке' && <WordSearch />}
+      </div>
     </div>
   )
 }
