@@ -124,12 +124,12 @@ function buildSteps(): Step[] {
 const ALL_STEPS = buildSteps();
 
 function nodeColor(id: number, step: Step): string {
-  if (step.path.includes(id))          return '#22c55e';
+  if (step.path.includes(id)) return '#22c55e';
   if (id === TARGET && step.phase !== 'found') return '#16a34a';
-  if (id === START && step.current === -1)     return '#38bdf8';
-  if (id === step.current)             return '#f97316';
-  if (step.queue.includes(id))         return '#fbbf24';
-  if (step.visited.includes(id))       return '#60a5fa';
+  if (id === START && step.current === -1) return '#38bdf8';
+  if (id === step.current)  return '#f97316';
+  if (step.queue.includes(id)) return '#fbbf24';
+  if (step.visited.includes(id)) return '#60a5fa';
   return '#94a3b8';
 }
 
@@ -233,11 +233,11 @@ export default function BFS() {
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 10, fontSize: 12 }}>
         {[
           { color: '#94a3b8', label: 'Не посещён' },
-          { color: '#38bdf8', label: 'Старт'       },
-          { color: '#fbbf24', label: 'В очереди'   },
-          { color: '#f97316', label: 'Текущий'      },
-          { color: '#60a5fa', label: 'Посещён'      },
-          { color: '#22c55e', label: 'Путь / Цель'  },
+          { color: '#38bdf8', label: 'Старт' },
+          { color: '#fbbf24', label: 'В очереди' },
+          { color: '#f97316', label: 'Текущий' },
+          { color: '#60a5fa', label: 'Посещён' },
+          { color: '#22c55e', label: 'Путь / Цель' },
         ].map(({ color, label }) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <div style={{ width: 12, height: 12, borderRadius: '50%', background: color }} />
@@ -280,11 +280,11 @@ export default function BFS() {
         </div>
       </div>
       <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {btn('⏮ В начало',  () => { setPlaying(false); setIdx(0); },                       idx === 0)}
-        {btn('← Назад',    () => setIdx(i => Math.max(0, i - 1)),                          idx === 0)}
-        {btn(playing ? '⏸ Пауза' : '▶ Авто', () => setPlaying(p => !p),                   isLast)}
-        {btn('Вперёд →',   () => setIdx(i => Math.min(ALL_STEPS.length - 1, i + 1)),       isLast)}
-        {btn('В конец ⏭',  () => { setPlaying(false); setIdx(ALL_STEPS.length - 1); },     isLast)}
+        {btn('⏮ В начало',  () => { setPlaying(false); setIdx(0); }, idx === 0)}
+        {btn('← Назад',    () => setIdx(i => Math.max(0, i - 1)), idx === 0)}
+        {btn(playing ? '⏸ Пауза' : '▶ Авто', () => setPlaying(p => !p), isLast)}
+        {btn('Вперёд →',   () => setIdx(i => Math.min(ALL_STEPS.length - 1, i + 1)), isLast)}
+        {btn('В конец ⏭',  () => { setPlaying(false); setIdx(ALL_STEPS.length - 1); }, isLast)}
       </div>
     </div>
   );
