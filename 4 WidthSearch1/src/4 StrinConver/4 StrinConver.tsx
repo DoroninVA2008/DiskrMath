@@ -22,12 +22,18 @@ function buildAdj(words: string[]): Map<string, string[]> {
 
 function bfsDist(start: string, adj: Map<string, string[]>): Map<string, number> {
   const dist = new Map<string, number>([[start, 0]])
-  const q = [start]; let h = 0
-  while (h < q.length) {
-    const cur = q[h++]
-    for (const nb of adj.get(cur) ?? [])
-      if (!dist.has(nb)) { dist.set(nb, dist.get(cur)! + 1); q.push(nb) }
+  const queue = [start]
+
+  while (queue.length > 0) {
+    const current = queue.shift()!
+    for (const neighbor of adj.get(current) ?? []) {
+      if (!dist.has(neighbor)) {
+        dist.set(neighbor, dist.get(current)! + 1)
+        queue.push(neighbor)
+      }
+    }
   }
+
   return dist
 }
 
@@ -64,8 +70,8 @@ interface Step {
 }
 
 function buildSteps(wordA: string, wordB: string, wordList: string[]): Step[] {
-  const all = [...new Set([wordA, wordB, ...wordList])]
-  const adj = buildAdj(all)
+  const allWords = [...new Set([wordA, wordB, ...wordList])]
+  const adj = buildAdj(allWords)
   const steps: Step[] = []
 
   const dist = new Map<string, number>([[wordA, 0]])
@@ -73,25 +79,40 @@ function buildSteps(wordA: string, wordB: string, wordList: string[]): Step[] {
   const queue: string[] = [wordA]
 
   while (queue.length > 0) {
-    const cur = queue.shift()!
+    const current = queue.shift()!
 
-    if (cur === wordB) {
+    if (current === wordB) {
       const path: string[] = []
-      let w: string | null = cur
-      while (w !== null) { path.unshift(w); w = parent.get(w) ?? null }
-      steps.push({ current: cur, queue: [...queue], dist: new Map(dist), found: true, path })
+      let word: string | null = current
+      while (word !== null) {
+        path.unshift(word)
+        word = parent.get(word) ?? null
+      }
+      steps.push({
+        current,
+        queue: [...queue],
+        dist: new Map(dist),
+        found: true,
+        path,
+      })
       break
     }
 
-    for (const nb of (adj.get(cur) ?? []).sort()) {
-      if (!dist.has(nb)) {
-        dist.set(nb, dist.get(cur)! + 1)
-        parent.set(nb, cur)
-        queue.push(nb)
+    for (const neighbor of (adj.get(current) ?? []).sort()) {
+      if (!dist.has(neighbor)) {
+        dist.set(neighbor, dist.get(current)! + 1)
+        parent.set(neighbor, current)
+        queue.push(neighbor)
       }
     }
 
-    steps.push({ current: cur, queue: [...queue], dist: new Map(dist), found: false, path: [] })
+    steps.push({
+      current,
+      queue: [...queue],
+      dist: new Map(dist),
+      found: false,
+      path: [],
+    })
   }
 
   return steps
@@ -143,7 +164,9 @@ export default function StrinConver() {
   }, [playing, steps.length])
 
   function changeWord(setter: (v: string) => void, val: string) {
-    setter(val.toLowerCase()); setStepIdx(null); setPlaying(false)
+    setter(val.toLowerCase())
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   const edges = useMemo(() => {

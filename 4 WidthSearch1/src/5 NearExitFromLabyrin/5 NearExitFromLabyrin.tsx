@@ -27,14 +27,15 @@ function findNearestExit(maze: number[][], start: Pos): { steps: number; exit: P
   while (queue.length > 0) {
     const { pos, dist } = queue.shift()!
 
-    for (const [dr, dc] of DIRS) {
-      const r = pos.row + dr
-      const c = pos.col + dc
+    for (const [dRow, dCol] of DIRS) {
+      const nextRow = pos.row + dRow
+      const nextCol = pos.col + dCol
+      const inBounds = nextRow >= 0 && nextRow < rows && nextCol >= 0 && nextCol < cols
 
-      if (r >= 0 && r < rows && c >= 0 && c < cols && maze[r][c] === 0 && !visited[r][c]) {
-        if (isExit(r, c)) return { steps: dist + 1, exit: { row: r, col: c } }
-        visited[r][c] = true
-        queue.push({ pos: { row: r, col: c }, dist: dist + 1 })
+      if (inBounds && maze[nextRow][nextCol] === 0 && !visited[nextRow][nextCol]) {
+        if (isExit(nextRow, nextCol)) return { steps: dist + 1, exit: { row: nextRow, col: nextCol } }
+        visited[nextRow][nextCol] = true
+        queue.push({ pos: { row: nextRow, col: nextCol }, dist: dist + 1 })
       }
     }
   }

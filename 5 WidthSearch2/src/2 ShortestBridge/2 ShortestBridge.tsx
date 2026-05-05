@@ -20,52 +20,64 @@ function findShortestBridge(grid: number[][]): { length: number; log: string } {
   const n = grid.length
   const matrix = grid.map(row => [...row])
 
-  let startR = -1, startC = -1
-  outer: for (let r = 0; r < n; r++)
-    for (let c = 0; c < n; c++)
-      if (matrix[r][c] === 1) { startR = r; startC = c; break outer }
+  let startRow = -1
+  let startCol = -1
+  for (let r = 0; r < n && startRow === -1; r++) {
+    for (let c = 0; c < n; c++) {
+      if (matrix[r][c] === 1) {
+        startRow = r
+        startCol = c
+        break
+      }
+    }
+  }
 
-  if (startR === -1) return { length: 0, log: 'Островов нет' }
+  if (startRow === -1) return { length: 0, log: 'Островов нет' }
 
   const firstIsland: Cell[] = []
-  const q: Cell[] = [[startR, startC]]
-  matrix[startR][startC] = 2
+  const queue: Cell[] = [[startRow, startCol]]
+  matrix[startRow][startCol] = 2
 
-  while (q.length > 0) {
-    const [r, c] = q.shift()!
-    firstIsland.push([r, c])
-    for (const [dr, dc] of dirs) {
-      const nr = r + dr, nc = c + dc
-      if (nr >= 0 && nr < n && nc >= 0 && nc < n && matrix[nr][nc] === 1) {
-        matrix[nr][nc] = 2
-        q.push([nr, nc])
+  while (queue.length > 0) {
+    const [row, col] = queue.shift()!
+    firstIsland.push([row, col])
+    for (const [dRow, dCol] of dirs) {
+      const nextRow = row + dRow
+      const nextCol = col + dCol
+      if (nextRow >= 0 && nextRow < n && nextCol >= 0 && nextCol < n && matrix[nextRow][nextCol] === 1) {
+        matrix[nextRow][nextCol] = 2
+        queue.push([nextRow, nextCol])
       }
     }
   }
 
   const dist: number[][] = Array.from({ length: n }, () => Array(n).fill(-1))
-  const bfsQ: Cell[] = []
+  const bridgeQueue: Cell[] = []
 
-  for (const [r, c] of firstIsland) {
-    for (const [dr, dc] of dirs) {
-      const nr = r + dr, nc = c + dc
-      if (nr >= 0 && nr < n && nc >= 0 && nc < n && matrix[nr][nc] === 0 && dist[nr][nc] === -1) {
-        dist[nr][nc] = 1
-        bfsQ.push([nr, nc])
+  for (const [row, col] of firstIsland) {
+    for (const [dRow, dCol] of dirs) {
+      const nextRow = row + dRow
+      const nextCol = col + dCol
+      const inBounds = nextRow >= 0 && nextRow < n && nextCol >= 0 && nextCol < n
+      if (inBounds && matrix[nextRow][nextCol] === 0 && dist[nextRow][nextCol] === -1) {
+        dist[nextRow][nextCol] = 1
+        bridgeQueue.push([nextRow, nextCol])
       }
     }
   }
 
-  while (bfsQ.length > 0) {
-    const [r, c] = bfsQ.shift()!
-    if (matrix[r][c] === 1) {
-      return { length: dist[r][c], log: `Второй остров найден в (${r}, ${c}), длина моста = ${dist[r][c]}` }
+  while (bridgeQueue.length > 0) {
+    const [row, col] = bridgeQueue.shift()!
+    if (matrix[row][col] === 1) {
+      return { length: dist[row][col], log: `Второй остров найден в (${row}, ${col}), длина моста = ${dist[row][col]}` }
     }
-    for (const [dr, dc] of dirs) {
-      const nr = r + dr, nc = c + dc
-      if (nr >= 0 && nr < n && nc >= 0 && nc < n && matrix[nr][nc] !== 2 && dist[nr][nc] === -1) {
-        dist[nr][nc] = dist[r][c] + 1
-        bfsQ.push([nr, nc])
+    for (const [dRow, dCol] of dirs) {
+      const nextRow = row + dRow
+      const nextCol = col + dCol
+      const inBounds = nextRow >= 0 && nextRow < n && nextCol >= 0 && nextCol < n
+      if (inBounds && matrix[nextRow][nextCol] !== 2 && dist[nextRow][nextCol] === -1) {
+        dist[nextRow][nextCol] = dist[row][col] + 1
+        bridgeQueue.push([nextRow, nextCol])
       }
     }
   }

@@ -19,41 +19,64 @@ interface BFSStep {
 }
 
 function buildSteps(start: Pos, end: Pos): BFSStep[] {
-  const [sr, sc] = start
-  const [er, ec] = end
+  const [startRow, startCol] = start
+  const [endRow, endCol] = end
   const steps: BFSStep[] = []
   const distMap: number[][] = Array.from({ length: SIZE }, () => Array(SIZE).fill(-1))
   const parent: (Pos | null)[][] = Array.from({ length: SIZE }, () => Array(SIZE).fill(null))
-  distMap[sr][sc] = 0
+  distMap[startRow][startCol] = 0
 
-  if (sr === er && sc === ec) {
-    steps.push({ current: [sr, sc], queue: [], distMap: distMap.map(r => [...r]), found: true, path: [[sr, sc]] })
+  if (startRow === endRow && startCol === endCol) {
+    steps.push({
+      current: [startRow, startCol],
+      queue: [],
+      distMap: distMap.map(r => [...r]),
+      found: true,
+      path: [[startRow, startCol]],
+    })
     return steps
   }
 
-  const queue: Pos[] = [[sr, sc]]
+  const queue: Pos[] = [[startRow, startCol]]
 
   while (queue.length > 0) {
-    const [r, c] = queue.shift()!
+    const [row, col] = queue.shift()!
 
-    if (r === er && c === ec) {
+    if (row === endRow && col === endCol) {
       const path: Pos[] = []
-      let cur: Pos | null = [r, c]
-      while (cur) { path.unshift(cur); cur = parent[cur[0]][cur[1]] }
-      steps.push({ current: [r, c], queue: [...queue], distMap: distMap.map(row => [...row]), found: true, path })
+      let cur: Pos | null = [row, col]
+      while (cur !== null) {
+        path.unshift(cur)
+        cur = parent[cur[0]][cur[1]]
+      }
+      steps.push({
+        current: [row, col],
+        queue: [...queue],
+        distMap: distMap.map(r => [...r]),
+        found: true,
+        path,
+      })
       break
     }
 
-    for (const [dr, dc] of KNIGHT) {
-      const nr = r + dr, nc = c + dc
-      if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && distMap[nr][nc] === -1) {
-        distMap[nr][nc] = distMap[r][c] + 1
-        parent[nr][nc] = [r, c]
-        queue.push([nr, nc])
+    for (const [dRow, dCol] of KNIGHT) {
+      const nextRow = row + dRow
+      const nextCol = col + dCol
+      const inBounds = nextRow >= 0 && nextRow < SIZE && nextCol >= 0 && nextCol < SIZE
+      if (inBounds && distMap[nextRow][nextCol] === -1) {
+        distMap[nextRow][nextCol] = distMap[row][col] + 1
+        parent[nextRow][nextCol] = [row, col]
+        queue.push([nextRow, nextCol])
       }
     }
 
-    steps.push({ current: [r, c], queue: [...queue], distMap: distMap.map(row => [...row]), found: false, path: [] })
+    steps.push({
+      current: [row, col],
+      queue: [...queue],
+      distMap: distMap.map(r => [...r]),
+      found: false,
+      path: [],
+    })
   }
 
   return steps
@@ -86,12 +109,22 @@ export default function MinKnightMoves() {
   function handleCell(r: number, c: number) {
     if (mode === 'start') setStart([r, c])
     else setEnd([r, c])
-    setStepIdx(null); setPlaying(false)
+    setStepIdx(null)
+    setPlaying(false)
+  }
+
+  function reset() {
+    setStart([0, 0])
+    setEnd([7, 7])
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   const knightReach = new Set(
-    KNIGHT.map(([dr, dc]) => `${start[0]+dr},${start[1]+dc}`)
-      .filter(k => { const [r,c] = k.split(',').map(Number); return r>=0&&r<SIZE&&c>=0&&c<SIZE })
+    KNIGHT
+      .map(([dRow, dCol]) => [start[0] + dRow, start[1] + dCol])
+      .filter(([r, c]) => r >= 0 && r < SIZE && c >= 0 && c < SIZE)
+      .map(([r, c]) => `${r},${c}`)
   )
 
   function getCellInfo(r: number, c: number) {
@@ -149,9 +182,7 @@ export default function MinKnightMoves() {
             {m === 'start' ? '♞ Поставить коня' : '⚑ Поставить цель'}
           </button>
         ))}
-        <button onClick={() => { setStart([0,0]); setEnd([7,7]); setStepIdx(null); setPlaying(false) }}>
-          ↩ Сброс
-        </button>
+        <button onClick={reset}>↩ Сброс</button>
       </div>
 
       <div style={{ display: 'inline-block', border: '2px solid #ccc', borderRadius: 4, background: '#e2e8f0' }}>

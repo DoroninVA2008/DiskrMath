@@ -27,12 +27,14 @@ function countIslands(grid: number[][]): number {
         const stack: [number, number][] = [[r, c]]
         visited[r][c] = true
         while (stack.length > 0) {
-          const [cr, cc] = stack.pop()!
-          for (const [dr, dc] of dirs) {
-            const nr = cr + dr, nc = cc + dc
-            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] === 1 && !visited[nr][nc]) {
-              visited[nr][nc] = true
-              stack.push([nr, nc])
+          const [curRow, curCol] = stack.pop()!
+          for (const [dRow, dCol] of dirs) {
+            const nextRow = curRow + dRow
+            const nextCol = curCol + dCol
+            const inBounds = nextRow >= 0 && nextRow < rows && nextCol >= 0 && nextCol < cols
+            if (inBounds && grid[nextRow][nextCol] === 1 && !visited[nextRow][nextCol]) {
+              visited[nextRow][nextCol] = true
+              stack.push([nextRow, nextCol])
             }
           }
         }
@@ -48,9 +50,11 @@ export default function IslandsCounter() {
   const [result, setResult] = useState<number | null>(null)
 
   function toggleCell(r: number, c: number) {
-    setGrid(prev => prev.map((row, i) =>
-      row.map((cell, j) => i === r && j === c ? (cell === 1 ? 0 : 1) : cell)
-    ))
+    setGrid(prev =>
+      prev.map((row, i) =>
+        row.map((cell, j) => (i === r && j === c ? (cell === 1 ? 0 : 1) : cell))
+      )
+    )
     setResult(null)
   }
 

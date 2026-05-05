@@ -109,26 +109,29 @@ const AdjacensMatrix: React.FC = () => {
   };
 
   return (
-    <div style={{ fontFamily: "monospace", padding: "1rem", maxWidth: "1000px", margin: "0 auto" }}>
-      <h2>📊 Кратчайшие пути от вершины 0 (матрица смежности)</h2>
-      
-      <div style={{ background: "#e3f2fd", padding: "1rem", borderRadius: "8px", marginBottom: "1rem", overflowX: "auto" }}>
-        <h3>📌 Матрица смежности:</h3>
-        <table style={{ borderCollapse: "collapse", margin: "0 auto" }}>
+    <div className="page-card">
+      <div className="task-header">
+        <h2>Кратчайшие пути от вершины 0 (матрица смежности)</h2>
+        <p>Алгоритм Беллмана–Форда на графе, заданном матрицей смежности 4×4.</p>
+      </div>
+
+      <div className="info-block info-block--blue" style={{ overflowX: "auto" }}>
+        <h3>Матрица смежности:</h3>
+        <table className="bf-table" style={{ margin: "0 auto", width: "auto" }}>
           <thead>
             <tr>
-              <th style={{ padding: "8px", border: "1px solid #ccc", background: "#90caf9" }}>↓ От / К →</th>
+              <th>↓ От / К →</th>
               {vertices.map(v => (
-                <th key={v} style={{ padding: "8px", border: "1px solid #ccc", background: "#90caf9" }}>{v}</th>
+                <th key={v}>{v}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {adjacencyMatrix.map((row, i) => (
               <tr key={i}>
-                <th style={{ padding: "8px", border: "1px solid #ccc", background: "#90caf9" }}>{i}</th>
+                <th>{i}</th>
                 {row.map((cell, j) => (
-                  <td key={j} style={{ padding: "8px", border: "1px solid #ccc", textAlign: "center" }}>
+                  <td key={j}>
                     {cell}
                   </td>
                 ))}
@@ -141,33 +144,33 @@ const AdjacensMatrix: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ background: "#f5f5f5", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-        <h3>🌉 Список рёбер (из матрицы):</h3>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <div className="info-block info-block--gray">
+        <h3>Список рёбер (из матрицы):</h3>
+        <table className="bf-table">
           <thead>
-            <tr style={{ background: "#ddd" }}>
-              <th style={{ padding: "4px", border: "1px solid #ccc" }}>От</th>
-              <th style={{ padding: "4px", border: "1px solid #ccc" }}>К</th>
-              <th style={{ padding: "4px", border: "1px solid #ccc" }}>Вес</th>
+            <tr>
+              <th>От</th>
+              <th>К</th>
+              <th>Вес</th>
             </tr>
           </thead>
           <tbody>
             {edges.map((edge, idx) => (
               <tr key={idx}>
-                <td style={{ padding: "4px", border: "1px solid #ccc", textAlign: "center" }}>{edge.from}</td>
-                <td style={{ padding: "4px", border: "1px solid #ccc", textAlign: "center" }}>{edge.to}</td>
-                <td style={{ padding: "4px", border: "1px solid #ccc", textAlign: "center" }}>{edge.weight}</td>
+                <td>{edge.from}</td>
+                <td>{edge.to}</td>
+                <td className={edge.weight < 0 ? "cell-neg" : ""}>{edge.weight}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div style={{ background: "#e8f5e9", padding: "1rem", borderRadius: "8px", marginBottom: "1rem", border: "2px solid #4caf50" }}>
-        <h3 style={{ margin: "0 0 1rem 0", color: "#2e7d32" }}>✅ РЕЗУЛЬТАТЫ (кратчайшие пути от вершины 0):</h3>
-        
-        <table border={1} cellPadding={10} style={{ borderCollapse: "collapse", width: "100%" }}>
-          <thead style={{ background: "#c8e6c9" }}>
+      <div className="info-block info-block--green">
+        <h3>РЕЗУЛЬТАТЫ (кратчайшие пути от вершины 0):</h3>
+
+        <table className="bf-table">
+          <thead>
             <tr>
               <th>Вершина</th>
               <th>Кратчайшее расстояние</th>
@@ -178,10 +181,10 @@ const AdjacensMatrix: React.FC = () => {
           <tbody>
             {results.map((res) => (
               <tr key={res.vertex}>
-                <td style={{ textAlign: "center", fontWeight: "bold", fontSize: "1.1rem" }}>
-                  {res.vertex}
+                <td>
+                  <strong>{res.vertex}</strong>
                 </td>
-                <td style={{ textAlign: "center" }}>
+                <td>
                   {res.distance === Infinity ? "∞ (недостижима)" : res.distance}
                 </td>
                 <td>
@@ -200,40 +203,40 @@ const AdjacensMatrix: React.FC = () => {
         </table>
       </div>
 
-      <details style={{ marginBottom: "1rem" }}>
-        <summary style={{ cursor: "pointer", fontWeight: "bold", padding: "0.5rem", background: "#f5f5f5", borderRadius: "4px" }}>
-          🔍 Пошаговое объяснение работы алгоритма
-        </summary>
-        <div style={{ marginTop: "1rem", background: "#fffde7", padding: "1rem", borderRadius: "8px" }}>
-          <h4>Алгоритм Беллмана–Форда:</h4>
-          <ol style={{ margin: 0, paddingLeft: "1.5rem" }}>
-            <li><strong>Инициализация:</strong> dist[0] = 0, dist[1] = ∞, dist[2] = ∞, dist[3] = ∞</li>
-            <li><strong>Итерация 1:</strong>
-              <ul>
-                <li>Ребро 0 → 1 (5): dist[1] = 0 + 5 = 5</li>
-                <li>Ребро 1 → 2 (-3): 5 + (-3) = 2 → dist[2] = 2</li>
-                <li>Ребро 2 → 3 (4): 2 + 4 = 6 → dist[3] = 6</li>
-                <li>Ребро 3 → 0 (2): 6 + 2 = 8 &gt; 0 → не обновляем</li>
-              </ul>
-            </li>
-            <li><strong>Итерация 2-3:</strong> дальнейших улучшений нет</li>
-            <li><strong>Проверка на отрицательный цикл:</strong> не обнаружен</li>
-          </ol>
-          
-          <h4 style={{ marginTop: "1rem" }}>📐 Расчёт путей:</h4>
-          <ul>
-            <li><strong>Вершина 0:</strong> 0</li>
-            <li><strong>Вершина 1:</strong> 5 (0 → 1)</li>
-            <li><strong>Вершина 2:</strong> 2 (0 → 1 → 2, 5 + (-3) = 2)</li>
-            <li><strong>Вершина 3:</strong> 6 (0 → 1 → 2 → 3, 5 - 3 + 4 = 6)</li>
-          </ul>
+      <details className="details-toggle">
+        <summary>Пошаговое объяснение работы алгоритма</summary>
+        <div className="details-body">
+          <div className="info-block info-block--yellow" style={{ marginBottom: 0 }}>
+            <h4>Алгоритм Беллмана–Форда:</h4>
+            <ol className="step-list">
+              <li><strong>Инициализация:</strong> dist[0] = 0, dist[1] = ∞, dist[2] = ∞, dist[3] = ∞</li>
+              <li><strong>Итерация 1:</strong>
+                <ul>
+                  <li>Ребро 0 → 1 (5): dist[1] = 0 + 5 = 5</li>
+                  <li>Ребро 1 → 2 (-3): 5 + (-3) = 2 → dist[2] = 2</li>
+                  <li>Ребро 2 → 3 (4): 2 + 4 = 6 → dist[3] = 6</li>
+                  <li>Ребро 3 → 0 (2): 6 + 2 = 8 &gt; 0 → не обновляем</li>
+                </ul>
+              </li>
+              <li><strong>Итерация 2-3:</strong> дальнейших улучшений нет</li>
+              <li><strong>Проверка на отрицательный цикл:</strong> не обнаружен</li>
+            </ol>
+
+            <h4 style={{ marginTop: "1rem" }}>Расчёт путей:</h4>
+            <ul>
+              <li><strong>Вершина 0:</strong> 0</li>
+              <li><strong>Вершина 1:</strong> 5 (0 → 1)</li>
+              <li><strong>Вершина 2:</strong> 2 (0 → 1 → 2, 5 + (-3) = 2)</li>
+              <li><strong>Вершина 3:</strong> 6 (0 → 1 → 2 → 3, 5 - 3 + 4 = 6)</li>
+            </ul>
+          </div>
         </div>
       </details>
 
-      <div style={{ background: "#fff3e0", padding: "1rem", borderRadius: "8px" }}>
-        <h3>📝 Итоговый ответ:</h3>
+      <div className="info-block info-block--orange">
+        <h3>Итоговый ответ:</h3>
         {results.map(res => (
-          <p key={res.vertex} style={{ margin: "0.5rem 0", fontFamily: "monospace", fontSize: "1rem" }}>
+          <p key={res.vertex} style={{ margin: "0.5rem 0", fontSize: "1rem" }}>
             <strong>{res.vertex} :</strong> {res.distance === Infinity ? "∞" : res.distance}
             {res.path.length > 1 && res.vertex !== start && (
               <span style={{ color: "#666" }}>
@@ -245,8 +248,8 @@ const AdjacensMatrix: React.FC = () => {
         ))}
       </div>
 
-      <div style={{ marginTop: "1rem", textAlign: "center", padding: "0.5rem", background: "#f0f0f0", borderRadius: "8px", fontSize: "0.9rem" }}>
-        <strong>🎯 Результат соответствует условию задачи:</strong> 0:0, 1:5, 2:2 (0→1→2), 3:6 (0→1→2→3)
+      <div className="answer-bar">
+        <strong>Результат соответствует условию задачи:</strong> 0:0, 1:5, 2:2 (0→1→2), 3:6 (0→1→2→3)
       </div>
     </div>
   );

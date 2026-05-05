@@ -22,11 +22,13 @@ function findMinOps(n: number): BFSResult | null {
       { val: val + 1, op: `+1 → ${val + 1}` },
     ]
 
-    for (const { val: nv, op } of next) {
-      if (nv === n) return { steps: path.length, path: [...path, nv], operations: [...ops, op] }
-      if (!visited.has(nv) && nv > 0 && nv <= limit) {
-        visited.add(nv)
-        queue.push({ val: nv, path: [...path, nv], ops: [...ops, op] })
+    for (const { val: nextVal, op } of next) {
+      if (nextVal === n) {
+        return { steps: path.length, path: [...path, nextVal], operations: [...ops, op] }
+      }
+      if (!visited.has(nextVal) && nextVal > 0 && nextVal <= limit) {
+        visited.add(nextVal)
+        queue.push({ val: nextVal, path: [...path, nextVal], ops: [...ops, op] })
       }
     }
   }
@@ -59,12 +61,21 @@ export default function SnowBall() {
           Целевое число N:
           <input
             type="number" min={1} value={target}
-            onChange={e => { setTarget(+e.target.value || 1); setResult(undefined) }}
+            onChange={e => {
+                setTarget(+e.target.value || 1)
+                setResult(undefined)
+              }}
             style={{ display: 'block', marginTop: 4, padding: '6px 10px', border: '1px solid #ccc', borderRadius: 6, fontSize: 15, width: 120 }}
           />
         </label>
         <button onClick={handleCalculate}>Найти минимум операций</button>
-        <button onClick={() => { setTarget(10); setResult(undefined) }} style={{ background: '#6b7280' }}>
+        <button
+          onClick={() => {
+            setTarget(10)
+            setResult(undefined)
+          }}
+          style={{ background: '#6b7280' }}
+        >
           Пример (N=10)
         </button>
       </div>

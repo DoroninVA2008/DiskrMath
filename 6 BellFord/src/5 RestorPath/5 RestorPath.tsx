@@ -124,58 +124,55 @@ const RestorPath: React.FC = () => {
   ];
 
   return (
-    <div style={{ fontFamily: "monospace", padding: "1rem", maxWidth: "1000px", margin: "0 auto" }}>
-      <h2>🛣️ Восстановление кратчайшего пути от A до D</h2>
-      
-      <div style={{ background: "#e3f2fd", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-        <h3>📌 Граф:</h3>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <div className="page-card">
+      <div className="task-header">
+        <h2>Восстановление кратчайшего пути от A до D</h2>
+        <p>Поиск оптимального пути с использованием массива предшественников prev[].</p>
+      </div>
+
+      <div className="info-block info-block--blue">
+        <h3>Граф:</h3>
+        <table className="bf-table">
           <thead>
-            <tr style={{ background: "#90caf9" }}>
-              <th style={{ padding: "8px", border: "1px solid #ccc" }}>От</th>
-              <th style={{ padding: "8px", border: "1px solid #ccc" }}>К</th>
-              <th style={{ padding: "8px", border: "1px solid #ccc" }}>Вес</th>
+            <tr>
+              <th>От</th>
+              <th>К</th>
+              <th>Вес</th>
             </tr>
           </thead>
           <tbody>
             {edges.map((e, idx) => (
               <tr key={idx}>
-                <td style={{ padding: "8px", border: "1px solid #ccc", textAlign: "center" }}>{e.from}</td>
-                <td style={{ padding: "8px", border: "1px solid #ccc", textAlign: "center" }}>{e.to}</td>
-                <td style={{ padding: "8px", border: "1px solid #ccc", textAlign: "center" }}>{e.weight}</td>
-               </tr>
+                <td>{e.from}</td>
+                <td>{e.to}</td>
+                <td className={e.weight < 0 ? "cell-neg" : ""}>{e.weight}</td>
+              </tr>
             ))}
           </tbody>
         </table>
         <div style={{ marginTop: "0.5rem", fontStyle: "italic" }}>
-          🎯 Старт: <strong>A</strong> | Цель: <strong>D</strong>
+          Старт: <strong>A</strong> | Цель: <strong>D</strong>
         </div>
       </div>
 
       {result.hasNegativeCycle && (
-        <div style={{ background: "#ffebee", padding: "1rem", borderRadius: "8px", marginBottom: "1rem", border: "2px solid #f44336" }}>
-          <strong style={{ color: "#c62828" }}>⚠️ ВНИМАНИЕ: Обнаружен цикл отрицательного веса!</strong>
+        <div className="info-block info-block--red">
+          <strong>ВНИМАНИЕ: Обнаружен цикл отрицательного веса!</strong>
         </div>
       )}
 
-      <div style={{ 
-        background: "#e8f5e9", 
-        padding: "1.5rem", 
-        borderRadius: "8px",
-        marginBottom: "1rem",
-        border: "3px solid #4caf50"
-      }}>
-        <h3 style={{ margin: "0 0 1rem 0", color: "#2e7d32", textAlign: "center" }}>
-          ✅ КРАТЧАЙШИЙ ПУТЬ НАЙДЕН
+      <div className="info-block info-block--green">
+        <h3 style={{ textAlign: "center" }}>
+          КРАТЧАЙШИЙ ПУТЬ НАЙДЕН
         </h3>
-        
+
         {result.distance !== -1 ? (
           <>
             <div style={{ fontSize: "1.3rem", textAlign: "center", marginBottom: "1rem" }}>
-              <strong>📏 Длина пути:</strong> {result.distance}
+              <strong>Длина пути:</strong> {result.distance}
             </div>
             <div style={{ fontSize: "1.2rem", textAlign: "center", marginBottom: "1rem", background: "#fff", padding: "0.5rem", borderRadius: "4px" }}>
-              <strong>🛤️ Путь:</strong> {formatPath(result.path)}
+              <strong>Путь:</strong> {formatPath(result.path)}
             </div>
             <div style={{ textAlign: "center", color: "#555", fontStyle: "italic" }}>
               {getPathCalculation(result.path)} = {result.distance}
@@ -188,13 +185,11 @@ const RestorPath: React.FC = () => {
         )}
       </div>
 
-      <details style={{ marginBottom: "1rem" }}>
-        <summary style={{ cursor: "pointer", fontWeight: "bold", padding: "0.5rem", background: "#f5f5f5", borderRadius: "4px" }}>
-          🔍 Сравнение всех возможных путей из A в D
-        </summary>
-        <div style={{ marginTop: "1rem" }}>
-          <table border={1} cellPadding={10} style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead style={{ background: "#ddd" }}>
+      <details className="details-toggle">
+        <summary>Сравнение всех возможных путей из A в D</summary>
+        <div className="details-body">
+          <table className="bf-table">
+            <thead>
               <tr>
                 <th>Путь</th>
                 <th>Расчёт</th>
@@ -204,22 +199,22 @@ const RestorPath: React.FC = () => {
             </thead>
             <tbody>
               {alternativePaths.map((alt, idx) => {
-                const isOptimal = alt.weight === result.distance && 
+                const isOptimal = alt.weight === result.distance &&
                                   JSON.stringify(alt.path) === JSON.stringify(result.path);
                 return (
-                  <tr key={idx} style={isOptimal ? { background: "#c8e6c9", fontWeight: "bold" } : {}}>
+                  <tr key={idx} className={isOptimal ? "row-green" : ""}>
                     <td>{alt.path.join(" → ")}</td>
                     <td>
-                      {alt.path.map((v, i) => 
-                        i < alt.path.length - 1 ? 
+                      {alt.path.map((v, i) =>
+                        i < alt.path.length - 1 ?
                         `${v}→${alt.path[i+1]}(${edges.find(e => e.from === v && e.to === alt.path[i+1])?.weight})` : ''
                       ).filter(x => x).join(" + ")}
                     </td>
-                    <td style={{ textAlign: "center" }}>{alt.weight}</td>
-                    <td style={{ textAlign: "center" }}>
-                      {isOptimal ? "✅ Оптимальный" : "❌ Длиннее"}
+                    <td>{alt.weight}</td>
+                    <td>
+                      {isOptimal ? "Оптимальный" : "Длиннее"}
                     </td>
-                   </tr>
+                  </tr>
                 );
               })}
             </tbody>
@@ -227,13 +222,11 @@ const RestorPath: React.FC = () => {
         </div>
       </details>
 
-      <details style={{ marginBottom: "1rem" }}>
-        <summary style={{ cursor: "pointer", fontWeight: "bold", padding: "0.5rem", background: "#f5f5f5", borderRadius: "4px" }}>
-          📊 Кратчайшие расстояния от A до всех вершин
-        </summary>
-        <div style={{ marginTop: "1rem" }}>
-          <table border={1} cellPadding={8} style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead style={{ background: "#ddd" }}>
+      <details className="details-toggle">
+        <summary>Кратчайшие расстояния от A до всех вершин</summary>
+        <div className="details-body">
+          <table className="bf-table">
+            <thead>
               <tr>
                 <th>Вершина</th>
                 <th>Расстояние от A</th>
@@ -242,9 +235,9 @@ const RestorPath: React.FC = () => {
             </thead>
             <tbody>
               {vertices.map((v) => (
-                <tr key={v} style={v === target ? { background: "#c8e6c9", fontWeight: "bold" } : {}}>
-                  <td style={{ textAlign: "center" }}><strong>{v}</strong></td>
-                  <td style={{ textAlign: "center" }}>
+                <tr key={v} className={v === target ? "row-green" : ""}>
+                  <td><strong>{v}</strong></td>
+                  <td>
                     {result.allDistances[v] === Infinity ? "∞" : result.allDistances[v]}
                   </td>
                   <td>{formatPath(result.allPaths[v])}</td>
@@ -255,9 +248,9 @@ const RestorPath: React.FC = () => {
         </div>
       </details>
 
-      <div style={{ background: "#fff3e0", padding: "1rem", borderRadius: "8px" }}>
-        <h3>📝 Пошаговое объяснение:</h3>
-        <ol style={{ margin: 0, paddingLeft: "1.5rem" }}>
+      <div className="info-block info-block--orange">
+        <h3>Пошаговое объяснение:</h3>
+        <ol className="step-list">
           <li><strong>Инициализация:</strong> dist[A] = 0, dist[B] = ∞, dist[C] = ∞, dist[D] = ∞</li>
           <li><strong>Ребро A → B (3):</strong> dist[B] = 0 + 3 = 3, prev[B] = A</li>
           <li><strong>Ребро A → C (5):</strong> dist[C] = 5, prev[C] = A</li>
@@ -266,16 +259,16 @@ const RestorPath: React.FC = () => {
           <li><strong>Ребро C → D (4):</strong> 1 + 4 = 5 &gt; 4 → не обновляем</li>
         </ol>
         <p style={{ marginTop: "1rem", marginBottom: 0, background: "#fff", padding: "0.5rem", borderRadius: "4px" }}>
-          <strong>✨ Оптимальный путь:</strong> A → B → D, длина = 3 + 1 = <strong>4</strong>
+          <strong>Оптимальный путь:</strong> A → B → D, длина = 3 + 1 = <strong>4</strong>
         </p>
       </div>
 
-      <div style={{ marginTop: "1rem", textAlign: "center", padding: "1rem", background: "#f0f0f0", borderRadius: "8px" }}>
-        <strong>🎯 Ответ (по условию задачи):</strong>
+      <div className="answer-bar">
+        <strong>Ответ (по условию задачи):</strong>
         <div style={{ marginTop: "0.5rem" }}>
-          <div>Длина: <strong style={{ fontSize: "1.2rem", color: "#2e7d32" }}>{result.distance}</strong></div>
+          <div>Длина: <strong style={{ fontSize: "1.2rem" }}>{result.distance}</strong></div>
           <div>Путь: <strong>{formatPath(result.path)}</strong></div>
-          <div style={{ fontSize: "0.9rem", color: "#555" }}>({getPathCalculation(result.path)} = {result.distance})</div>
+          <div style={{ fontSize: "0.9rem", color: "#718096" }}>({getPathCalculation(result.path)} = {result.distance})</div>
         </div>
       </div>
     </div>

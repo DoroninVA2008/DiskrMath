@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 type Pos = { row: number; col: number }
 
-const dirs: Pos[] = [{ row: -1, col: 0 }, { row: 1, col: 0 }, { row: 0, col: -1 }, { row: 0, col: 1 }]
+const dirs: [number, number][] = [[-1, 0], [1, 0], [0, -1], [0, 1]]
 
 const defgrid: string[][] = [
   ['S', '0', '1', 'E'],
@@ -16,11 +16,12 @@ function findEvacuationTime(grid: string[][]): { time: number; dist: number[][];
   let exit: Pos | null = null
   const people: Pos[] = []
 
-  for (let r = 0; r < rows; r++)
+  for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (grid[r][c] === 'E') exit = { row: r, col: c }
       if (grid[r][c] === 'S') people.push({ row: r, col: c })
     }
+  }
 
   if (!exit) return { time: -1, dist: [], error: 'Выход E не найден!' }
   if (people.length === 0) return { time: -1, dist: [], error: 'Люди S не найдены!' }
@@ -31,11 +32,13 @@ function findEvacuationTime(grid: string[][]): { time: number; dist: number[][];
 
   while (queue.length > 0) {
     const { row, col } = queue.shift()!
-    for (const { row: dr, col: dc } of dirs) {
-      const nr = row + dr, nc = col + dc
-      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] !== '1' && dist[nr][nc] === -1) {
-        dist[nr][nc] = dist[row][col] + 1
-        queue.push({ row: nr, col: nc })
+    for (const [dRow, dCol] of dirs) {
+      const nextRow = row + dRow
+      const nextCol = col + dCol
+      const inBounds = nextRow >= 0 && nextRow < rows && nextCol >= 0 && nextCol < cols
+      if (inBounds && grid[nextRow][nextCol] !== '1' && dist[nextRow][nextCol] === -1) {
+        dist[nextRow][nextCol] = dist[row][col] + 1
+        queue.push({ row: nextRow, col: nextCol })
       }
     }
   }
@@ -62,7 +65,11 @@ export default function RoomEvacuation() {
   const [result, setResult] = useState<{ time: number; dist: number[][]; error: string } | null>(null)
 
   function updateCell(r: number, c: number, val: string) {
-    setGrid(prev => prev.map((row, i) => row.map((cell, j) => i === r && j === c ? val : cell)))
+    setGrid(prev =>
+      prev.map((row, i) =>
+        row.map((cell, j) => (i === r && j === c ? val : cell))
+      )
+    )
     setResult(null)
   }
 

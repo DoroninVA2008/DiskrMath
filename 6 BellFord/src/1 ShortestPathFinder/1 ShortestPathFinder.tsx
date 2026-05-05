@@ -82,46 +82,54 @@ const ShortestPathFinder: React.FC = () => {
   };
 
   return (
-    <div style={{ fontFamily: "monospace", padding: "1rem" }}>
-      <h2>📐 Кратчайшие пути от вершины A</h2>
-      <h3>📌 Рёбра графа:</h3>
-      <pre>
-        {edges.map((e, idx) => (
-          <div key={idx}>
-            {e.from} → {e.to} : вес {e.weight}
-          </div>
-        ))}
-      </pre>
+    <div className="page-card">
+      <div className="task-header">
+        <h2>Кратчайшие пути от вершины A</h2>
+        <p>Алгоритм Беллмана–Форда. Граф с 5 вершинами и отрицательным ребром B → C.</p>
+      </div>
 
-      <h3>✅ Результаты (алгоритм Беллмана–Форда):</h3>
-      <table border={1} cellPadding={8} style={{ borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            <th>Вершина</th>
-            <th>Кратчайшее расстояние от A</th>
-            <th>Путь</th>
-          </tr>
-        </thead>
-        <tbody>
-          {results.map((res) => (
-            <tr key={res.vertex}>
-              <td>
-                <strong>{res.vertex}</strong>
-              </td>
-              <td>
-                {res.distance === Infinity
-                  ? "∞ (недостижима)"
-                  : res.distance}
-              </td>
-              <td>{getPathString(res.path)}</td>
-            </tr>
+      <div className="info-block info-block--blue">
+        <h3>Рёбра графа:</h3>
+        <pre>
+          {edges.map((e, idx) => (
+            <div key={idx}>
+              {e.from} → {e.to} : вес {e.weight}
+            </div>
           ))}
-        </tbody>
-      </table>
+        </pre>
+      </div>
 
-      <div style={{ marginTop: "1rem", background: "#f4f4f4", padding: "0.5rem" }}>
-        <strong>📝 Примечание:</strong>
-        <ul>
+      <div className="info-block info-block--green">
+        <h3>Результаты (алгоритм Беллмана–Форда):</h3>
+        <table className="bf-table">
+          <thead>
+            <tr>
+              <th>Вершина</th>
+              <th>Кратчайшее расстояние от A</th>
+              <th>Путь</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((res) => (
+              <tr key={res.vertex}>
+                <td>
+                  <strong>{res.vertex}</strong>
+                </td>
+                <td>
+                  {res.distance === Infinity
+                    ? "∞ (недостижима)"
+                    : res.distance}
+                </td>
+                <td>{getPathString(res.path)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="answer-bar">
+        <strong>Примечание:</strong>
+        <ul style={{ textAlign: "left", display: "inline-block", marginTop: 8 }}>
           <li>A → C: A → B → C (4 + (-1) = 3)</li>
           <li>A → D: A → B → D (4 + 5 = 9)</li>
           <li>A → E: A → B → D → E (4 + 5 + 2 = 11)</li>

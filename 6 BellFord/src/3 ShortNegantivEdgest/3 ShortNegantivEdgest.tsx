@@ -112,25 +112,28 @@ const ShortNegantivEdgest: React.FC = () => {
   };
 
   return (
-    <div style={{ fontFamily: "monospace", padding: "1rem", maxWidth: "1000px", margin: "0 auto" }}>
-      <h2>🎯 Кратчайший путь от S до F (с отрицательными рёбрами)</h2>
-      
-      <div style={{ background: "#e3f2fd", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-        <h3>📌 Граф:</h3>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <div className="page-card">
+      <div className="task-header">
+        <h2>Кратчайший путь от S до F (с отрицательными рёбрами)</h2>
+        <p>Алгоритм Беллмана–Форда корректно обрабатывает рёбра с отрицательным весом.</p>
+      </div>
+
+      <div className="info-block info-block--blue">
+        <h3>Граф:</h3>
+        <table className="bf-table">
           <thead>
-            <tr style={{ background: "#90caf9" }}>
-              <th style={{ padding: "4px", border: "1px solid #ccc" }}>От</th>
-              <th style={{ padding: "4px", border: "1px solid #ccc" }}>К</th>
-              <th style={{ padding: "4px", border: "1px solid #ccc" }}>Вес</th>
+            <tr>
+              <th>От</th>
+              <th>К</th>
+              <th>Вес</th>
             </tr>
           </thead>
           <tbody>
             {edges.map((e, idx) => (
               <tr key={idx}>
-                <td style={{ padding: "4px", border: "1px solid #ccc", textAlign: "center" }}>{e.from}</td>
-                <td style={{ padding: "4px", border: "1px solid #ccc", textAlign: "center" }}>{e.to}</td>
-                <td style={{ padding: "4px", border: "1px solid #ccc", textAlign: "center" }}>{e.weight}</td>
+                <td>{e.from}</td>
+                <td>{e.to}</td>
+                <td className={e.weight < 0 ? "cell-neg" : ""}>{e.weight}</td>
               </tr>
             ))}
           </tbody>
@@ -141,23 +144,17 @@ const ShortNegantivEdgest: React.FC = () => {
       </div>
 
       {result.hasNegativeCycle && (
-        <div style={{ background: "#ffebee", padding: "1rem", borderRadius: "8px", marginBottom: "1rem", border: "2px solid #f44336" }}>
-          <strong style={{ color: "#c62828" }}>⚠️ ВНИМАНИЕ: Обнаружен цикл отрицательного веса!</strong>
+        <div className="info-block info-block--red">
+          <strong>ВНИМАНИЕ: Обнаружен цикл отрицательного веса!</strong>
           <p style={{ marginTop: "0.5rem", marginBottom: 0 }}>Кратчайший путь может быть не определён.</p>
         </div>
       )}
 
-      <div style={{ 
-        background: result.distance !== -1 ? "#e8f5e9" : "#ffebee", 
-        padding: "1rem", 
-        borderRadius: "8px",
-        marginBottom: "1rem",
-        border: `2px solid ${result.distance !== -1 ? "#4caf50" : "#f44336"}`
-      }}>
-        <h3 style={{ margin: "0 0 0.5rem 0", color: result.distance !== -1 ? "#2e7d32" : "#c62828" }}>
-          {result.distance !== -1 ? "✅ КРАТЧАЙШИЙ ПУТЬ НАЙДЕН" : "❌ Путь не существует"}
+      <div className={`info-block ${result.distance !== -1 ? "info-block--green" : "info-block--red"}`}>
+        <h3>
+          {result.distance !== -1 ? "КРАТЧАЙШИЙ ПУТЬ НАЙДЕН" : "Путь не существует"}
         </h3>
-        
+
         {result.distance !== -1 && (
           <>
             <p style={{ fontSize: "1.2rem", margin: "0.5rem 0" }}>
@@ -167,17 +164,17 @@ const ShortNegantivEdgest: React.FC = () => {
               <strong>Путь:</strong> {formatPath(result.path)}
             </p>
             <p style={{ margin: "0.5rem 0", color: "#555", fontStyle: "italic" }}>
-              Проверка: {result.path.join(" → ")} = {result.path.map((v, idx) => 
-                idx < result.path.length - 1 ? 
-                `${v}${edges.find(e => e.from === v && e.to === result.path[idx + 1])?.weight !== undefined ? 
-                `(${edges.find(e => e.from === v && e.to === result.path[idx + 1])!.weight})` : ''} → ` : 
+              Проверка: {result.path.join(" → ")} = {result.path.map((v, idx) =>
+                idx < result.path.length - 1 ?
+                `${v}${edges.find(e => e.from === v && e.to === result.path[idx + 1])?.weight !== undefined ?
+                `(${edges.find(e => e.from === v && e.to === result.path[idx + 1])!.weight})` : ''} → ` :
                 v
               ).join('')}
               = {calculatePathWeight(result.path)}
             </p>
-            <div style={{ background: "#f5f5f5", padding: "0.5rem", borderRadius: "4px", marginTop: "0.5rem" }}>
-              <strong>Расчёт:</strong> {result.path.map((v, i) => 
-                i < result.path.length - 1 ? 
+            <div className="info-block info-block--gray" style={{ marginBottom: 0 }}>
+              <strong>Расчёт:</strong> {result.path.map((v, i) =>
+                i < result.path.length - 1 ?
                 `${v} → ${result.path[i+1]} (${edges.find(e => e.from === v && e.to === result.path[i+1])?.weight})` : ''
               ).filter(x => x).join(' + ')} = {calculatePathWeight(result.path)}
             </div>
@@ -185,13 +182,11 @@ const ShortNegantivEdgest: React.FC = () => {
         )}
       </div>
 
-      <details style={{ marginBottom: "1rem" }}>
-        <summary style={{ cursor: "pointer", fontWeight: "bold", padding: "0.5rem", background: "#f5f5f5", borderRadius: "4px" }}>
-          📊 Кратчайшие расстояния от S до всех вершин
-        </summary>
-        <div style={{ marginTop: "1rem" }}>
-          <table border={1} cellPadding={8} style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead style={{ background: "#ddd" }}>
+      <details className="details-toggle">
+        <summary>Кратчайшие расстояния от S до всех вершин</summary>
+        <div className="details-body">
+          <table className="bf-table">
+            <thead>
               <tr>
                 <th>Вершина</th>
                 <th>Расстояние от S</th>
@@ -200,9 +195,9 @@ const ShortNegantivEdgest: React.FC = () => {
             </thead>
             <tbody>
               {vertices.map((v) => (
-                <tr key={v} style={v === target ? { background: "#c8e6c9", fontWeight: "bold" } : {}}>
-                  <td style={{ textAlign: "center" }}><strong>{v}</strong></td>
-                  <td style={{ textAlign: "center" }}>
+                <tr key={v} className={v === target ? "row-green" : ""}>
+                  <td><strong>{v}</strong></td>
+                  <td>
                     {result.allDistances[v] === Infinity ? "∞" : result.allDistances[v]}
                   </td>
                   <td>{formatPath(result.allPaths[v])}</td>
@@ -213,9 +208,9 @@ const ShortNegantivEdgest: React.FC = () => {
         </div>
       </details>
 
-      <div style={{ background: "#fff3e0", padding: "1rem", borderRadius: "8px" }}>
-        <h3>📝 Пошаговое объяснение:</h3>
-        <ol style={{ margin: 0, paddingLeft: "1.5rem" }}>
+      <div className="info-block info-block--orange">
+        <h3>Пошаговое объяснение:</h3>
+        <ol className="step-list">
           <li>Начинаем из S: расстояние до S = 0, остальные ∞</li>
           <li>Ребро S → A (4): dist[A] = 4</li>
           <li>Ребро S → B (3): dist[B] = 3</li>
@@ -229,8 +224,8 @@ const ShortNegantivEdgest: React.FC = () => {
         </p>
       </div>
 
-      <div style={{ marginTop: "1rem", textAlign: "center", padding: "1rem", background: "#f0f0f0", borderRadius: "8px" }}>
-        <strong>🎯 Ответ:</strong> Длина: {result.distance}, Путь: {formatPath(result.path)}
+      <div className="answer-bar">
+        <strong>Ответ:</strong> Длина: {result.distance}, Путь: {formatPath(result.path)}
       </div>
     </div>
   );

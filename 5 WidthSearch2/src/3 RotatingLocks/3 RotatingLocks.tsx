@@ -8,9 +8,13 @@ function getNeighbors(code: string): string[] {
   const digits = code.split('').map(Number)
   const result: string[] = []
   for (let i = 0; i < 4; i++) {
-    const fwd = [...digits]; fwd[i] = (digits[i] + 1) % 10
-    const bwd = [...digits]; bwd[i] = (digits[i] - 1 + 10) % 10
-    result.push(fwd.join(''), bwd.join(''))
+    const forward = [...digits]
+    forward[i] = (digits[i] + 1) % 10
+
+    const backward = [...digits]
+    backward[i] = (digits[i] - 1 + 10) % 10
+
+    result.push(forward.join(''), backward.join(''))
   }
   return result
 }
@@ -28,12 +32,12 @@ function findMinRotations(
 
   while (queue.length > 0) {
     const { code, path } = queue.shift()!
-    for (const nb of getNeighbors(code)) {
-      if (!visited.has(nb) && !forbidden.has(nb)) {
-        const newPath = [...path, nb]
-        if (nb === target) return { steps: newPath.length - 1, path: newPath }
-        visited.add(nb)
-        queue.push({ code: nb, path: newPath })
+    for (const neighbor of getNeighbors(code)) {
+      if (!visited.has(neighbor) && !forbidden.has(neighbor)) {
+        const newPath = [...path, neighbor]
+        if (neighbor === target) return { steps: newPath.length - 1, path: newPath }
+        visited.add(neighbor)
+        queue.push({ code: neighbor, path: newPath })
       }
     }
   }
@@ -62,8 +66,10 @@ export default function RotatingLocks() {
   }
 
   function reset() {
-    setStart(Start); setTarget(Target)
-    setForbiddenInput(ForBiden); setSolved(false)
+    setStart(Start)
+    setTarget(Target)
+    setForbiddenInput(ForBiden)
+    setSolved(false)
   }
 
   const inputStyle: React.CSSProperties = {

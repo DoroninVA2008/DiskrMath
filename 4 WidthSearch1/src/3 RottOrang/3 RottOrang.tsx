@@ -6,34 +6,42 @@ type DrawMode = 0 | 1 | 2
 const DIRS: [number, number][] = [[-1,0],[1,0],[0,-1],[0,1]]
 
 function computeBFS(grid: CellVal[][]): { time: number; distMap: number[][] } {
-  const R = grid.length
-  const C = grid[0]?.length ?? 0
-  const distMap: number[][] = Array.from({ length: R }, () => Array(C).fill(-1))
+  const rows = grid.length
+  const cols = grid[0]?.length ?? 0
+  const distMap: number[][] = Array.from({ length: rows }, () => Array(cols).fill(-1))
   const queue: [number, number][] = []
 
-  for (let r = 0; r < R; r++)
-    for (let c = 0; c < C; c++)
-      if (grid[r][c] === 2) { distMap[r][c] = 0; queue.push([r, c]) }
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] === 2) {
+        distMap[r][c] = 0
+        queue.push([r, c])
+      }
+    }
+  }
 
-  let head = 0
-  while (head < queue.length) {
-    const [r, c] = queue[head++]
-    for (const [dr, dc] of DIRS) {
-      const nr = r + dr, nc = c + dc
-      if (nr >= 0 && nr < R && nc >= 0 && nc < C && grid[nr][nc] === 1 && distMap[nr][nc] === -1) {
-        distMap[nr][nc] = distMap[r][c] + 1
-        queue.push([nr, nc])
+  while (queue.length > 0) {
+    const [row, col] = queue.shift()!
+    for (const [dRow, dCol] of DIRS) {
+      const nextRow = row + dRow
+      const nextCol = col + dCol
+      const inBounds = nextRow >= 0 && nextRow < rows && nextCol >= 0 && nextCol < cols
+      if (inBounds && grid[nextRow][nextCol] === 1 && distMap[nextRow][nextCol] === -1) {
+        distMap[nextRow][nextCol] = distMap[row][col] + 1
+        queue.push([nextRow, nextCol])
       }
     }
   }
 
   let time = 0
-  for (let r = 0; r < R; r++)
-    for (let c = 0; c < C; c++)
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
       if (grid[r][c] === 1) {
         if (distMap[r][c] === -1) return { time: -1, distMap }
         time = Math.max(time, distMap[r][c])
       }
+    }
+  }
 
   return { time, distMap }
 }
@@ -69,25 +77,35 @@ export default function RottOrang() {
   }, [playing, totalSteps])
 
   function changeSize(newR: number, newC: number) {
-    setGrid(prev => Array.from({ length: newR }, (_, r) =>
-      Array.from({ length: newC }, (_, c) =>
-        r < prev.length && c < (prev[0]?.length ?? 0) ? prev[r][c] : 0
-      ) as CellVal[]
-    ))
-    setRows(newR); setCols(newC)
-    setStepIdx(null); setPlaying(false)
+    setGrid(prev =>
+      Array.from({ length: newR }, (_, r) =>
+        Array.from({ length: newC }, (_, c) =>
+          r < prev.length && c < (prev[0]?.length ?? 0) ? prev[r][c] : 0
+        ) as CellVal[]
+      )
+    )
+    setRows(newR)
+    setCols(newC)
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   function handleCell(r: number, c: number) {
-    setGrid(prev => prev.map((row, ri) =>
-      row.map((cell, ci) => ri === r && ci === c ? mode as CellVal : cell)
-    ))
-    setStepIdx(null); setPlaying(false)
+    setGrid(prev =>
+      prev.map((row, ri) =>
+        row.map((cell, ci) => (ri === r && ci === c ? (mode as CellVal) : cell))
+      )
+    )
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   function reset() {
-    setGrid(DEFAULT); setRows(3); setCols(3)
-    setStepIdx(null); setPlaying(false)
+    setGrid(DEFAULT)
+    setRows(3)
+    setCols(3)
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   function getCellInfo(r: number, c: number) {

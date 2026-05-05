@@ -56,7 +56,7 @@ const NegantiveCycle: React.FC = () => {
           dist[edge.to] = dist[edge.from] + edge.weight;
           prev[edge.to] = edge.from;
           relaxed = true;
-          
+
           // Логируем каждую релаксацию
           iterationsLog.push({
             step: i + 1,
@@ -71,17 +71,17 @@ const NegantiveCycle: React.FC = () => {
     // Проверка на отрицательный цикл (дополнительная итерация)
     let hasCycle = false;
     let cycleEdges: string[] = [];
-    
+
     for (const edge of edges) {
       if (dist[edge.from] + edge.weight < dist[edge.to]) {
         hasCycle = true;
         cycleEdges.push(`${edge.from} → ${edge.to} (вес ${edge.weight})`);
-        
+
         // Находим вершины в цикле
         const cycleVertices: string[] = [];
         let current = edge.to;
         const visited = new Set<string>();
-        
+
         while (!visited.has(current)) {
           visited.add(current);
           cycleVertices.unshift(current);
@@ -89,11 +89,11 @@ const NegantiveCycle: React.FC = () => {
           if (!current) break;
         }
         cycleVertices.unshift(current);
-        
+
         iterationsLog.push({
           step: vertices.length,
           distances: { ...dist },
-          relaxingEdge: `⚠️ Отрицательный цикл: ${cycleVertices.join(" → ")} → ${edge.to}`,
+          relaxingEdge: `Отрицательный цикл: ${cycleVertices.join(" → ")} → ${edge.to}`,
         });
         break;
       }
@@ -114,11 +114,14 @@ const NegantiveCycle: React.FC = () => {
   };
 
   return (
-    <div style={{ fontFamily: "monospace", padding: "1rem", maxWidth: "900px", margin: "0 auto" }}>
-      <h2>🔍 Обнаружение цикла отрицательного веса</h2>
-      
-      <div style={{ background: "#e3f2fd", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}>
-        <h3>📌 Граф для проверки:</h3>
+    <div className="page-card">
+      <div className="task-header">
+        <h2>Обнаружение цикла отрицательного веса</h2>
+        <p>Граф A → B → C → A с суммой весов 1 + (−1) + (−1) = −1.</p>
+      </div>
+
+      <div className="info-block info-block--blue">
+        <h3>Граф для проверки:</h3>
         <pre style={{ margin: 0 }}>
           {edges.map((e, idx) => (
             <div key={idx}>
@@ -131,15 +134,9 @@ const NegantiveCycle: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ 
-        background: result.hasNegativeCycle ? "#ffebee" : "#e8f5e9", 
-        padding: "1rem", 
-        borderRadius: "8px",
-        marginBottom: "1rem",
-        border: `2px solid ${result.hasNegativeCycle ? "#f44336" : "#4caf50"}`
-      }}>
-        <h3 style={{ margin: 0, color: result.hasNegativeCycle ? "#c62828" : "#2e7d32" }}>
-          {result.hasNegativeCycle ? "⚠️ ЦИКЛ ОТРИЦАТЕЛЬНОГО ВЕСА ОБНАРУЖЕН" : "✅ Цикл отрицательного веса не обнаружен"}
+      <div className={`info-block ${result.hasNegativeCycle ? "info-block--red" : "info-block--green"}`}>
+        <h3>
+          {result.hasNegativeCycle ? "ЦИКЛ ОТРИЦАТЕЛЬНОГО ВЕСА ОБНАРУЖЕН" : "Цикл отрицательного веса не обнаружен"}
         </h3>
         {result.hasNegativeCycle && (
           <p style={{ marginTop: "0.5rem", marginBottom: 0 }}>
@@ -148,13 +145,11 @@ const NegantiveCycle: React.FC = () => {
         )}
       </div>
 
-      <details style={{ marginBottom: "1rem" }}>
-        <summary style={{ cursor: "pointer", fontWeight: "bold", padding: "0.5rem", background: "#f5f5f5", borderRadius: "4px" }}>
-          📊 Показать пошаговую работу алгоритма Беллмана–Форда
-        </summary>
-        <div style={{ marginTop: "1rem" }}>
-          <table border={1} cellPadding={6} style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead style={{ background: "#ddd" }}>
+      <details className="details-toggle">
+        <summary>Показать пошаговую работу алгоритма Беллмана–Форда</summary>
+        <div className="details-body">
+          <table className="bf-table">
+            <thead>
               <tr>
                 <th>Шаг</th>
                 <th>Релаксируемое ребро</th>
@@ -165,7 +160,7 @@ const NegantiveCycle: React.FC = () => {
             </thead>
             <tbody>
               {result.iterations?.map((iter, idx) => (
-                <tr key={idx} style={iter.relaxingEdge?.includes("Отрицательный") ? { background: "#ffcdd2" } : {}}>
+                <tr key={idx} className={iter.relaxingEdge?.includes("Отрицательный") ? "row-red" : ""}>
                   <td>{iter.step}</td>
                   <td>{iter.relaxingEdge || "Инициализация"}</td>
                   <td>{getDistanceDisplay(iter.distances["A"])}</td>
@@ -178,8 +173,8 @@ const NegantiveCycle: React.FC = () => {
         </div>
       </details>
 
-      <div style={{ background: "#fff3e0", padding: "1rem", borderRadius: "8px" }}>
-        <h3>📝 Объяснение:</h3>
+      <div className="info-block info-block--orange">
+        <h3>Объяснение:</h3>
         <ul>
           <li>Алгоритм Беллмана–Форда выполняет релаксацию всех рёбер |V|-1 = 2 раза</li>
           <li>После этого выполняется дополнительная (3-я) итерация для проверки</li>
@@ -188,8 +183,9 @@ const NegantiveCycle: React.FC = () => {
         </ul>
       </div>
 
-      <div style={{ marginTop: "1rem", textAlign: "center", color: "#666", fontSize: "0.9rem" }}>
-        <strong>Ответ:</strong> Обнаружен цикл отрицательного веса: <strong style={{ color: "#f44336" }}>{result.hasNegativeCycle ? "True" : "False"}</strong>
+      <div className="answer-bar">
+        <strong>Ответ:</strong> Обнаружен цикл отрицательного веса:{" "}
+        <strong>{result.hasNegativeCycle ? "True" : "False"}</strong>
       </div>
     </div>
   );

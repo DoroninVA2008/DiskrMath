@@ -15,39 +15,56 @@ interface BFSStep {
 }
 
 function buildSteps(maze: Cell[][], start: Pos, end: Pos): BFSStep[] {
-  const n = maze.length
-  const [sr, sc] = start
-  const [er, ec] = end
+  const size = maze.length
+  const [startRow, startCol] = start
+  const [endRow, endCol] = end
   const steps: BFSStep[] = []
 
-  if (maze[sr]?.[sc] !== 0 || maze[er]?.[ec] !== 0) return steps
+  if (maze[startRow]?.[startCol] !== 0 || maze[endRow]?.[endCol] !== 0) return steps
 
-  const distMap: number[][] = Array.from({ length: n }, () => Array(n).fill(-1))
-  const parent: (Pos | null)[][] = Array.from({ length: n }, () => Array(n).fill(null))
-  distMap[sr][sc] = 0
-  const queue: Pos[] = [[sr, sc]]
+  const distMap: number[][] = Array.from({ length: size }, () => Array(size).fill(-1))
+  const parent: (Pos | null)[][] = Array.from({ length: size }, () => Array(size).fill(null))
+  distMap[startRow][startCol] = 0
+  const queue: Pos[] = [[startRow, startCol]]
 
   while (queue.length > 0) {
-    const [r, c] = queue.shift()!
+    const [row, col] = queue.shift()!
 
-    if (r === er && c === ec) {
+    if (row === endRow && col === endCol) {
       const path: Pos[] = []
-      let cur: Pos | null = [r, c]
-      while (cur) { path.unshift(cur); cur = parent[cur[0]][cur[1]] }
-      steps.push({ current: [r, c], queue: [...queue], distMap: distMap.map(row => [...row]), found: true, path })
+      let cur: Pos | null = [row, col]
+      while (cur !== null) {
+        path.unshift(cur)
+        cur = parent[cur[0]][cur[1]]
+      }
+      steps.push({
+        current: [row, col],
+        queue: [...queue],
+        distMap: distMap.map(r => [...r]),
+        found: true,
+        path,
+      })
       break
     }
 
-    for (const [dr, dc] of DIRS) {
-      const nr = r + dr, nc = c + dc
-      if (nr >= 0 && nr < n && nc >= 0 && nc < n && maze[nr][nc] === 0 && distMap[nr][nc] === -1) {
-        distMap[nr][nc] = distMap[r][c] + 1
-        parent[nr][nc] = [r, c]
-        queue.push([nr, nc])
+    for (const [dRow, dCol] of DIRS) {
+      const nextRow = row + dRow
+      const nextCol = col + dCol
+      const inBounds = nextRow >= 0 && nextRow < size && nextCol >= 0 && nextCol < size
+      if (inBounds && maze[nextRow][nextCol] === 0 && distMap[nextRow][nextCol] === -1) {
+        distMap[nextRow][nextCol] = distMap[row][col] + 1
+        parent[nextRow][nextCol] = [row, col]
+        queue.push([nextRow, nextCol])
       }
     }
 
-    steps.push({ current: [r, c], queue: [...queue], distMap: distMap.map(row => [...row]), found: false, path: [] })
+    steps.push({
+      current: [row, col],
+      queue: [...queue],
+      distMap: distMap.map(r => [...r]),
+      found: false,
+      path: [],
+    })
   }
 
   return steps
@@ -87,10 +104,13 @@ export default function ShortPathInLabyrin() {
 
   function handleCell(r: number, c: number) {
     if (mode === 'wall') {
-      if ((r === start[0] && c === start[1]) || (r === end[0] && c === end[1])) return
-      setMaze(prev => prev.map((row, ri) =>
-        row.map((cell, ci) => ri === r && ci === c ? (cell === 0 ? 1 : 0) : cell) as Cell[]
-      ))
+      const isStartOrEnd = (r === start[0] && c === start[1]) || (r === end[0] && c === end[1])
+      if (isStartOrEnd) return
+      setMaze(prev =>
+        prev.map((row, ri) =>
+          row.map((cell, ci) => (ri === r && ci === c ? (cell === 0 ? 1 : 0) : cell)) as Cell[]
+        )
+      )
     } else if (mode === 'start') {
       if (maze[r][c] === 1) return
       setStart([r, c])
@@ -108,26 +128,35 @@ export default function ShortPathInLabyrin() {
         r < maze.length && c < maze[0].length ? maze[r][c] : 0
       ) as Cell[]
     )
-    setN(newN); setMaze(newMaze)
-    setStart([0, 0]); setEnd([newN - 1, newN - 1])
-    setStepIdx(null); setPlaying(false)
+    setN(newN)
+    setMaze(newMaze)
+    setStart([0, 0])
+    setEnd([newN - 1, newN - 1])
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   function randomMaze() {
-    const m: Cell[][] = Array.from({ length: n }, (_, r) =>
+    const newMaze: Cell[][] = Array.from({ length: n }, (_, r) =>
       Array.from({ length: n }, (_, c) => {
         if ((r === 0 && c === 0) || (r === n - 1 && c === n - 1)) return 0
         return Math.random() < 0.28 ? 1 : 0
       }) as Cell[]
     )
-    setMaze(m); setStart([0, 0]); setEnd([n - 1, n - 1])
-    setStepIdx(null); setPlaying(false)
+    setMaze(newMaze)
+    setStart([0, 0])
+    setEnd([n - 1, n - 1])
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   function reset() {
-    setMaze(DEFAULT_MAZE); setN(3)
-    setStart(DEFAULT_START); setEnd(DEFAULT_END)
-    setStepIdx(null); setPlaying(false)
+    setMaze(DEFAULT_MAZE)
+    setN(3)
+    setStart(DEFAULT_START)
+    setEnd(DEFAULT_END)
+    setStepIdx(null)
+    setPlaying(false)
   }
 
   function getCellInfo(r: number, c: number) {
