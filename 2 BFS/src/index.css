@@ -1,68 +1,213 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #333;
+  background-color: #f0f4f8;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #f0f4f8;
+  display: block;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+#root {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+h1, h2, h3, h4 {
+  color: #2d3748;
+  margin-top: 0;
+}
+
+h2 {
+  font-size: 1.6em;
+  margin-bottom: 8px;
+}
+
+a {
+  font-weight: 500;
+  color: #1a73e8;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #0d47a1;
+}
+
+/* Карточка страницы — оборачивает весь контент */
+.page-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 30px 35px;
+}
+
+/* Заголовок задачи */
+.task-header {
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e8edf2;
+}
+
+.task-header h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 8px;
+}
+
+.task-header p {
+  color: #718096;
+  font-size: 0.95em;
+  margin: 0;
+}
+
+/* Секция визуализации */
+.section-title {
+  font-size: 1.15em;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 12px;
+}
+
+/* SVG-граф обёртка */
+.graph-wrapper {
+  border: 1px solid #d1d9e0;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #fafbfc;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+/* Легенда */
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 0.85em;
+  color: #555;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Блок информации о шаге */
+.step-info {
+  margin-top: 14px;
+  padding: 14px 18px;
+  background-color: #f7faff;
+  border: 1px solid #d1e3f8;
+  border-radius: 8px;
+  font-size: 0.92em;
+  line-height: 1.8;
+  color: #2d3748;
+}
+
+.step-info .step-counter {
+  color: #718096;
+  margin-bottom: 4px;
+  font-size: 0.88em;
+}
+
+.step-info .step-desc {
+  color: #718096;
+  font-size: 0.88em;
+  margin-top: 6px;
+}
+
+.step-info .found-msg {
+  color: #22863a;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+/* Кнопки управления */
+.controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.88em;
+  font-weight: 600;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #1a73e8;
+  color: #ffffff;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: background-color 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:hover:not(:disabled) {
+  background-color: #0d47a1;
+}
+
+button:disabled {
+  background-color: #c8d6e5;
+  color: #8fa3b8;
+  cursor: not-allowed;
+}
+
+button:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+/* Результаты */
+.results {
+  margin-top: 20px;
+  border-top: 1px dashed #d1d9e0;
+  padding-top: 16px;
+}
+
+.results p {
+  background-color: #e8f5e9;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid #4caf50;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.results h4 {
+  margin-top: 20px;
+  color: #2e7d32;
+}
+
+.final-path {
+  font-weight: bold;
+  color: #1b5e20;
+  background-color: #c8e6c9 !important;
+  border-left-color: #2e7d32 !important;
+  font-size: 1em;
 }

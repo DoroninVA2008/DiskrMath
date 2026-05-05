@@ -1,29 +1,13 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../algos.css'
 
-interface TreeNode {
-  val: number
-  left?: TreeNode
-  right?: TreeNode
-}
+type TreeNode = { val: number; left?: TreeNode; right?: TreeNode }
+type NodePos  = { val: number; x: number; y: number; id: string }
+type EdgePos  = { x1: number; y1: number; x2: number; y2: number }
 
-interface NodePos {
-  val: number
-  x: number
-  y: number
-  id: string
-}
-
-interface EdgePos {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-}
-
-interface DFSStep {
-  stack: number[]   
+type DFSStep = {
+  stack: number[]
   visited: number[]
   currentNode: number | null
   description: string
@@ -32,15 +16,6 @@ interface DFSStep {
 const NODE_R = 26
 const LEVEL_H = 90
 const SVG_W = 420
-
-// Пример:
-// Вход: 
-//       1
-//      / \
-//     2   3
-//    / \
-//   4   5
-// Выход: [1, 2, 4, 5, 3]
 
 const EXAMPLE_TREE: TreeNode = {
   val: 1,
@@ -69,17 +44,15 @@ function buildLayout(
   if (parentXY) {
     edges.push({ x1: parentXY.x, y1: parentXY.y, x2: x, y2: y })
   }
-  const mid = (left + right) / 2
-  buildLayout(node.left,  depth + 1, left, mid, `${id}-L`, positions, edges, { x, y })
-  buildLayout(node.right, depth + 1, mid, right, `${id}-R`, positions, edges, { x, y })
+  buildLayout(node.left,  depth + 1, left, x, `${id}-L`, positions, edges, { x, y })
+  buildLayout(node.right, depth + 1, x, right, `${id}-R`, positions, edges, { x, y })
 }
 
 function computeDFSSteps(root: TreeNode): DFSStep[] {
   const steps: DFSStep[] = []
 
-  const initStack: TreeNode[] = [root]
   steps.push({
-    stack: initStack.map(n => n.val),
+    stack: [root.val],
     visited: [],
     currentNode: null,
     description: `Инициализируем стек: помещаем корень ${root.val}. Стек: [${root.val}].`,
@@ -100,77 +73,54 @@ function computeDFSSteps(root: TreeNode): DFSStep[] {
     if (node.left)  pushed.push(node.left.val)
 
     const pushedStr = pushed.length > 0
-      ? ` Добавляем в стек: ${pushed.map(v => String(v)).join(', ')}.`
+      ? ` Добавляем в стек: ${pushed.join(', ')}.`
       : ' Нет дочерних узлов — ничего не добавляем.'
 
-    const stackStr = stack.length > 0
-      ? `[${stack.map(n => n.val).join(', ')}]`
-      : '[]'
+    const stackStr = stack.length > 0 ? `[${stack.map(n => n.val).join(', ')}]` : '[]'
 
     steps.push({
       stack: stack.map(n => n.val),
       visited: [...visited],
       currentNode: node.val,
-      description:
-        `Извлекаем ${node.val} из стека — посещаем узел.` +
-        pushedStr +
-        ` Стек: ${stackStr}.`,
+      description: `Извлекаем ${node.val} из стека — посещаем узел.` + pushedStr + ` Стек: ${stackStr}.`,
     })
   }
 
   return steps
 }
 
-interface TreeSVGProps {
+// Вычисляем один раз при загрузке модуля
+const ALL_STEPS = computeDFSSteps(EXAMPLE_TREE)
+const ALL_POSITIONS: NodePos[] = []
+const ALL_EDGES: EdgePos[] = []
+buildLayout(EXAMPLE_TREE, 0, 0, SVG_W, 'root', ALL_POSITIONS, ALL_EDGES)
+
+type TreeSVGProps = {
   positions: NodePos[]
   edges: EdgePos[]
   visitedPrev: number[]
   currentVal: number | null
 }
 
-const TreeSVG: React.FC<TreeSVGProps> = ({ positions, edges, visitedPrev, currentVal }) => {
-  const svgH = positions.length > 0
-    ? Math.max(...positions.map(p => p.y)) + NODE_R + 20
-    : 200
+function TreeSVG({ positions, edges, visitedPrev, currentVal }: TreeSVGProps) {
+  const svgH = positions.length > 0 ? Math.max(...positions.map(p => p.y)) + NODE_R + 20 : 200
 
   return (
     <svg width={SVG_W} height={svgH} style={{ display: 'block', margin: '0 auto' }}>
       {edges.map((e, i) => (
-        <line
-          key={i}
-          x1={e.x1} y1={e.y1}
-          x2={e.x2} y2={e.y2}
-          stroke="#999"
-          strokeWidth={2}
-        />
+        <line key={i} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke="#999" strokeWidth={2} />
       ))}
-
       {positions.map(p => {
         const isCurrent = p.val === currentVal
         const isVisited = visitedPrev.includes(p.val)
-
-        const fill   = isCurrent ? '#ff9800' : isVisited ? '#4caf50' : '#fff'
-        const stroke = isCurrent ? '#e65100' : '#333'
+        const fill      = isCurrent ? '#ff9800' : isVisited ? '#4caf50' : '#fff'
+        const stroke    = isCurrent ? '#e65100' : '#333'
         const textColor = (isCurrent || isVisited) ? '#fff' : '#333'
-
         return (
           <g key={p.id}>
-            <circle
-              cx={p.x} cy={p.y} r={NODE_R}
-              fill={fill}
-              stroke={stroke}
-              strokeWidth={isCurrent ? 3 : 2}
-            />
-            <text
-              x={p.x} y={p.y}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize={18}
-              fontWeight="bold"
-              fill={textColor}
-            >
-              {p.val}
-            </text>
+            <circle cx={p.x} cy={p.y} r={NODE_R} fill={fill} stroke={stroke} strokeWidth={isCurrent ? 3 : 2} />
+            <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central"
+              fontSize={18} fontWeight="bold" fill={textColor}>{p.val}</text>
           </g>
         )
       })}
@@ -178,34 +128,24 @@ const TreeSVG: React.FC<TreeSVGProps> = ({ positions, edges, visitedPrev, curren
   )
 }
 
-export const TraverDepTree: React.FC = () => {
-  const steps = useMemo(() => computeDFSSteps(EXAMPLE_TREE), [])
-
-  const { positions, edges } = useMemo(() => {
-    const pos: NodePos[] = []
-    const edg: EdgePos[] = []
-    buildLayout(EXAMPLE_TREE, 0, 0, SVG_W, 'root', pos, edg)
-    return { positions: pos, edges: edg }
-  }, [])
-
+function TraverDepTree() {
   const [stepIndex, setStepIndex] = useState(0)
 
-  const current = steps[stepIndex]
-  const isFinished = stepIndex === steps.length - 1 && current.stack.length === 0
+  const current    = ALL_STEPS[stepIndex]
+  const isFinished = stepIndex === ALL_STEPS.length - 1 && current.stack.length === 0
 
   const visitedPrev = isFinished
-    ? current.visited                                    
+    ? current.visited
     : current.visited.filter(v => v !== current.currentNode)
-
   const currentVal = isFinished ? null : current.currentNode
 
-  const handleNext = useCallback(() => {
-    setStepIndex(prev => Math.min(prev + 1, steps.length - 1))
-  }, [steps.length])
+  function handleNext() {
+    setStepIndex(prev => Math.min(prev + 1, ALL_STEPS.length - 1))
+  }
 
-  const handleReset = useCallback(() => {
+  function handleReset() {
     setStepIndex(0)
-  }, [])
+  }
 
   return (
     <div className="app-container">
@@ -218,12 +158,7 @@ export const TraverDepTree: React.FC = () => {
       <div className="solver-container">
         <h2>Визуализация дерева</h2>
         <div className="tree-visualizer">
-          <TreeSVG
-            positions={positions}
-            edges={edges}
-            visitedPrev={visitedPrev}
-            currentVal={currentVal}
-          />
+          <TreeSVG positions={ALL_POSITIONS} edges={ALL_EDGES} visitedPrev={visitedPrev} currentVal={currentVal} />
           <div className="legend">
             <div className="legend-item">
               <div className="legend-box" style={{ background: '#ff9800', borderColor: '#e65100' }} />
@@ -244,45 +179,33 @@ export const TraverDepTree: React.FC = () => {
           <strong>Стек (top → right):</strong>
           <div className="stack-items">
             {current.stack.length > 0
-              ? current.stack.map((v, i) => (
-                  <span key={i} className="stack-item">{v}</span>
-                ))
+              ? current.stack.map((v, i) => <span key={i} className="stack-item">{v}</span>)
               : <span className="stack-empty">пустой</span>
             }
           </div>
         </div>
 
         <div className="controls">
-          <button onClick={handleNext} disabled={isFinished}>
-            Следующий шаг
-          </button>
-          <button onClick={handleReset}>
-            Начать заново
-          </button>
+          <button onClick={handleNext} disabled={isFinished}>Следующий шаг</button>
+          <button onClick={handleReset}>Начать заново</button>
         </div>
 
         <div className="results">
           <h3>Ход выполнения:</h3>
-          {steps.slice(0, stepIndex + 1).map((s, i) => (
-            <p key={i}>
-              <strong>Шаг {i}:</strong> {s.description}
-            </p>
+          {ALL_STEPS.slice(0, stepIndex + 1).map((s, i) => (
+            <p key={i}><strong>Шаг {i}:</strong> {s.description}</p>
           ))}
-
           {isFinished && (
             <>
               <h4>Результат:</h4>
-              <p className="final-path">
-                DFS (префиксный обход): [{current.visited.join(', ')}]
-              </p>
+              <p className="final-path">DFS (префиксный обход): [{current.visited.join(', ')}]</p>
             </>
           )}
         </div>
       </div>
+
       <Link to="/2nTask">
-        <button>
-          Следующий алгоритм
-        </button>
+        <button>Следующий алгоритм</button>
       </Link>
     </div>
   )

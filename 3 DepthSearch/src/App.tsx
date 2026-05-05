@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import TraverDepTree from './1TraverDepTree/1TraverDepTree'
 import SumAllNodes from './2SumVallNodes/2SumVallNodes'
 import MaxDepTree from './3MaxDepTree/3MaxDepTree'
@@ -10,7 +10,7 @@ import FindWayOutLabyrin from './6FindWayOutLabyrin/6FindWayOutLabyrin'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<TraverDepTree />} />
         <Route path="/1sTask" element={<TraverDepTree />} />
@@ -20,6 +20,6 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/5hTask" element={<FindElemenTree />} />
         <Route path="/6hTask" element={<FindWayOutLabyrin />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>,
 )

@@ -60,7 +60,7 @@ h1, h2, h3, h4 {
 }
 
 
-.controls button {
+.app-container button {
   padding: 10px 15px;
   margin-right: 10px;
   border: none;
@@ -72,12 +72,12 @@ h1, h2, h3, h4 {
   transition: background-color 0.3s ease;
 }
 
-.controls button:disabled {
+.app-container button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }
 
-.controls button:hover:not(:disabled) {
+.app-container button:hover:not(:disabled) {
   background-color: #0d47a1;
 }
 

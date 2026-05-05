@@ -1,28 +1,12 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../algos.css'
 
-interface TreeNode {
-  val: number
-  left?: TreeNode
-  right?: TreeNode
-}
+type TreeNode = { val: number; left?: TreeNode; right?: TreeNode }
+type NodePos  = { val: number; x: number; y: number; id: string }
+type EdgePos  = { x1: number; y1: number; x2: number; y2: number }
 
-interface NodePos {
-  val: number
-  x: number
-  y: number
-  id: string
-}
-
-interface EdgePos {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-}
-
-interface SearchStep {
+type SearchStep = {
   stack: number[]
   visited: number[]
   currentNode: number | null
@@ -47,11 +31,7 @@ const TARGET = 5
 
 const EXAMPLE_TREE: TreeNode = {
   val: 1,
-  left: {
-    val: 2,
-    left: { val: 4 },
-    right: { val: 5 },
-  },
+  left: { val: 2, left: { val: 4 }, right: { val: 5 } },
   right: { val: 3 },
 }
 
@@ -72,20 +52,15 @@ function buildLayout(
   if (parentXY) {
     edges.push({ x1: parentXY.x, y1: parentXY.y, x2: x, y2: y })
   }
-  const mid = (left + right) / 2
-  buildLayout(node.left,  depth + 1, left, mid, `${id}-L`, positions, edges, { x, y })
-  buildLayout(node.right, depth + 1, mid, right, `${id}-R`, positions, edges, { x, y })
+  buildLayout(node.left,  depth + 1, left, x, `${id}-L`, positions, edges, { x, y })
+  buildLayout(node.right, depth + 1, x, right, `${id}-R`, positions, edges, { x, y })
 }
 
 function computeSearchSteps(root: TreeNode, target: number): SearchStep[] {
   const steps: SearchStep[] = []
 
   steps.push({
-    stack: [root.val],
-    visited: [],
-    currentNode: null,
-    found: false,
-    finished: false,
+    stack: [root.val], visited: [], currentNode: null, found: false, finished: false,
     description: `Ищем значение ${target}. Инициализируем стек: помещаем корень ${root.val}. Стек: [${root.val}].`,
   })
 
@@ -103,13 +78,9 @@ function computeSearchSteps(root: TreeNode, target: number): SearchStep[] {
 
     if (isMatch) {
       steps.push({
-        stack: stack.map(n => n.val),
-        visited: [...visited],
-        currentNode: node.val,
-        found: true,
-        finished: true,
-        description:
-          `Извлекаем ${node.val} из стека. Проверяем: ${node.val} === ${target}? Да! Элемент найден. Возвращаем True.`,
+        stack: stack.map(n => n.val), visited: [...visited],
+        currentNode: node.val, found: true, finished: true,
+        description: `Извлекаем ${node.val} из стека. Проверяем: ${node.val} === ${target}? Да! Элемент найден. Возвращаем True.`,
       })
       return steps
     }
@@ -125,32 +96,29 @@ function computeSearchSteps(root: TreeNode, target: number): SearchStep[] {
     const stackStr = stack.length > 0 ? `[${stack.map(n => n.val).join(', ')}]` : '[]'
 
     steps.push({
-      stack: stack.map(n => n.val),
-      visited: [...visited],
-      currentNode: node.val,
-      found: false,
-      finished: false,
+      stack: stack.map(n => n.val), visited: [...visited],
+      currentNode: node.val, found: false, finished: false,
       description:
         `Извлекаем ${node.val} из стека. Проверяем: ${node.val} === ${target}? Нет.` +
-        pushedStr +
-        ` Стек: ${stackStr}.`,
+        pushedStr + ` Стек: ${stackStr}.`,
     })
   }
 
-  // Элемент не найден
   steps.push({
-    stack: [],
-    visited: [...visited],
-    currentNode: null,
-    found: false,
-    finished: true,
+    stack: [], visited: [...visited], currentNode: null, found: false, finished: true,
     description: `Стек пуст. Элемент ${target} не найден. Возвращаем False.`,
   })
 
   return steps
 }
 
-interface TreeSVGProps {
+// Вычисляем один раз при загрузке модуля
+const ALL_STEPS = computeSearchSteps(EXAMPLE_TREE, TARGET)
+const ALL_POSITIONS: NodePos[] = []
+const ALL_EDGES: EdgePos[] = []
+buildLayout(EXAMPLE_TREE, 0, 0, SVG_W, 'root', ALL_POSITIONS, ALL_EDGES)
+
+type TreeSVGProps = {
   positions: NodePos[]
   edges: EdgePos[]
   visitedPrev: number[]
@@ -158,50 +126,26 @@ interface TreeSVGProps {
   foundVal: number | null
 }
 
-const TreeSVG: React.FC<TreeSVGProps> = ({ positions, edges, visitedPrev, currentVal, foundVal }) => {
-  const svgH = positions.length > 0
-    ? Math.max(...positions.map(p => p.y)) + NODE_R + 20
-    : 200
+function TreeSVG({ positions, edges, visitedPrev, currentVal, foundVal }: TreeSVGProps) {
+  const svgH = positions.length > 0 ? Math.max(...positions.map(p => p.y)) + NODE_R + 20 : 200
 
   return (
     <svg width={SVG_W} height={svgH} style={{ display: 'block', margin: '0 auto' }}>
       {edges.map((e, i) => (
-        <line
-          key={i}
-          x1={e.x1} y1={e.y1}
-          x2={e.x2} y2={e.y2}
-          stroke="#999"
-          strokeWidth={2}
-        />
+        <line key={i} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} stroke="#999" strokeWidth={2} />
       ))}
-
       {positions.map(p => {
         const isFound   = p.val === foundVal
         const isCurrent = !isFound && p.val === currentVal
         const isVisited = !isFound && visitedPrev.includes(p.val)
-
         const fill      = isFound ? '#2196f3' : isCurrent ? '#ff9800' : isVisited ? '#4caf50' : '#fff'
         const stroke    = isFound ? '#0d47a1' : isCurrent ? '#e65100' : isVisited ? '#388e3c' : '#333'
         const textColor = (isFound || isCurrent || isVisited) ? '#fff' : '#333'
-
         return (
           <g key={p.id}>
-            <circle
-              cx={p.x} cy={p.y} r={NODE_R}
-              fill={fill}
-              stroke={stroke}
-              strokeWidth={(isFound || isCurrent) ? 3 : 2}
-            />
-            <text
-              x={p.x} y={p.y}
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize={18}
-              fontWeight="bold"
-              fill={textColor}
-            >
-              {p.val}
-            </text>
+            <circle cx={p.x} cy={p.y} r={NODE_R} fill={fill} stroke={stroke} strokeWidth={(isFound || isCurrent) ? 3 : 2} />
+            <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central"
+              fontSize={18} fontWeight="bold" fill={textColor}>{p.val}</text>
           </g>
         )
       })}
@@ -209,34 +153,23 @@ const TreeSVG: React.FC<TreeSVGProps> = ({ positions, edges, visitedPrev, curren
   )
 }
 
-export const FindElemenTree: React.FC = () => {
-  const steps = useMemo(() => computeSearchSteps(EXAMPLE_TREE, TARGET), [])
-
-  const { positions, edges } = useMemo(() => {
-    const pos: NodePos[] = []
-    const edg: EdgePos[] = []
-    buildLayout(EXAMPLE_TREE, 0, 0, SVG_W, 'root', pos, edg)
-    return { positions: pos, edges: edg }
-  }, [])
-
+function FindElemenTree() {
   const [stepIndex, setStepIndex] = useState(0)
 
-  const current = steps[stepIndex]
+  const current = ALL_STEPS[stepIndex]
 
-  const visitedPrev = current.finished && current.found
-    ? current.visited.filter(v => v !== current.currentNode)
-    : current.visited.filter(v => v !== current.currentNode)
-
+  // Исправлено: в оригинале обе ветки тернарного оператора были одинаковыми
+  const visitedPrev = current.visited.filter(v => v !== current.currentNode)
   const currentVal  = current.finished && current.found ? null : current.currentNode
   const foundVal    = current.finished && current.found ? current.currentNode : null
 
-  const handleNext = useCallback(() => {
-    setStepIndex(prev => Math.min(prev + 1, steps.length - 1))
-  }, [steps.length])
+  function handleNext() {
+    setStepIndex(prev => Math.min(prev + 1, ALL_STEPS.length - 1))
+  }
 
-  const handleReset = useCallback(() => {
+  function handleReset() {
     setStepIndex(0)
-  }, [])
+  }
 
   return (
     <div className="app-container">
@@ -250,8 +183,8 @@ export const FindElemenTree: React.FC = () => {
         <h2>Визуализация дерева</h2>
         <div className="tree-visualizer">
           <TreeSVG
-            positions={positions}
-            edges={edges}
+            positions={ALL_POSITIONS}
+            edges={ALL_EDGES}
             visitedPrev={visitedPrev}
             currentVal={currentVal}
             foundVal={foundVal}
@@ -280,31 +213,22 @@ export const FindElemenTree: React.FC = () => {
           <strong>Стек (top → right):</strong>
           <div className="stack-items">
             {current.stack.length > 0
-              ? current.stack.map((v, i) => (
-                  <span key={i} className="stack-item">{v}</span>
-                ))
+              ? current.stack.map((v, i) => <span key={i} className="stack-item">{v}</span>)
               : <span className="stack-empty">пустой</span>
             }
           </div>
         </div>
 
         <div className="controls">
-          <button onClick={handleNext} disabled={current.finished}>
-            Следующий шаг
-          </button>
-          <button onClick={handleReset}>
-            Начать заново
-          </button>
+          <button onClick={handleNext} disabled={current.finished}>Следующий шаг</button>
+          <button onClick={handleReset}>Начать заново</button>
         </div>
 
         <div className="results">
           <h3>Ход выполнения:</h3>
-          {steps.slice(0, stepIndex + 1).map((s, i) => (
-            <p key={i}>
-              <strong>Шаг {i}:</strong> {s.description}
-            </p>
+          {ALL_STEPS.slice(0, stepIndex + 1).map((s, i) => (
+            <p key={i}><strong>Шаг {i}:</strong> {s.description}</p>
           ))}
-
           {current.finished && (
             <>
               <h4>Результат:</h4>
