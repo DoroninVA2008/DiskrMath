@@ -132,8 +132,8 @@ export default function RottOrang() {
   }
 
   const freshLeft = stepIdx !== null
-    ? grid.reduce((total, row, r) =>
-        total + row.reduce((cnt, val, c) => {
+    ? grid.reduce<number>((total, row, r) =>
+        total + row.reduce<number>((cnt, val, c) => {
           if (val !== 1) return cnt
           const d = distMap[r][c]
           return cnt + (d === -1 || d > stepIdx ? 1 : 0)
