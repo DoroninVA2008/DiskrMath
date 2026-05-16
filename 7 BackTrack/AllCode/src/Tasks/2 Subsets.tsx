@@ -5,7 +5,7 @@ interface UseSubsetsReturn {
   getCount: (n: number) => number;
 }
 
-export const useSubsets = (): UseSubsetsReturn => {
+const useSubsets = (): UseSubsetsReturn => {
   const backtrack = useCallback((
     nums: number[],
     startIndex: number,
@@ -36,7 +36,7 @@ export const useSubsets = (): UseSubsetsReturn => {
   return { generateAll, getCount };
 };
 
-const SubsetsVisualDemo: React.FC = () => {
+export const SubsetsVisualDemo: React.FC = () => {
   const [nums, setNums] = useState<number[]>([1, 2, 3]);
   const [subsets, setSubsets] = useState<number[][]>([]);
   const { generateAll, getCount } = useSubsets();
@@ -65,7 +65,7 @@ const SubsetsVisualDemo: React.FC = () => {
       {Object.entries(groupedBySize).map(([size, subsetsOfSize]) => (
         <div key={size} style={{ marginTop: '15px' }}>
           <h3>Подмножества размера {size}: ({subsetsOfSize.length})</h3>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ gap: '10px', flexWrap: 'wrap' }}>
             {subsetsOfSize.map((subset, idx) => (
               <div key={idx} style={{
                 padding: '6px 12px',

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-export const PermutationsGenerator: React.FC = () => {
+const PermutationsGenerator: React.FC = () => {
   const [input, setInput] = useState<string>('1,2,3');
   const [result, setResult] = useState<number[][]>([]);
 
@@ -20,6 +20,7 @@ export const PermutationsGenerator: React.FC = () => {
         used[i] = true;
         current.push(nums[i]);
 
+        // eslint-disable-next-line react-hooks/immutability
         backtrack(nums, current, used, allPermutations);
         
         current.pop();
